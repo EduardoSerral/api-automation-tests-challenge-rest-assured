@@ -94,8 +94,84 @@ public class BookingTests {
                         .statusCode(200)
                         .contentType(ContentType.JSON).and().time(lessThan(2000L));
 
+    }
+
+    @Test // Get Booking id list
+    public void getAllBookingIds_returnOk(){
+        Response response = request
+                .when()
+                .get("/booking")
+                .then()
+                .extract()
+                .response()
+                ;
+
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(200, response.statusCode());
+    }
+
+    @Test // Get booking by id
+    public void getBookingById_returnOk(){
+        request
+                .when()
+                .get("/booking/" + faker.number().digits(1))
+                .then()
+                .assertThat()
+                .statusCode(200)
+        ;
+    }
 
 
+    @Test // Get bookings by specific price
+    public void getAllBookingsByPrice_BookingExists_returnOk(){
+        request
+                .when()
+                .queryParam("totalprice", faker.number().digits(4))
+                .get("/booking")
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .and()
+                .body("results", hasSize(greaterThan(0)))
+        ;
+    }
+
+    @Test
+    public void delete_Booking_With_returnOk(){
+
+        given()
+                .contentType(ContentType.JSON)
+                .accept("application/json")
+                .auth().preemptive().basic("admin", "password123")
+                .when().delete("booking/1726")
+                .then()
+                .statusCode(201);
+    }
+
+    @Test
+    public void full_Update_Booking_With_returnOk() {
+
+         given()
+                .contentType(ContentType.JSON)
+                .accept("application/json")
+                .auth().preemptive().basic("admin", "password123")
+                .body(booking)
+                .when().put("booking/3")
+                .then()
+                .statusCode(200)
+                .extract().response();
+    }
+
+    @Test // Health check
+    public void apiUpCheck_returnCreated(){
+        request
+                .when()
+                .get("/ping")
+                .then()
+                .assertThat()
+                .statusCode(201)
+        ;
     }
 
 }
